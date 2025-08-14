@@ -5,84 +5,26 @@ import Button from '../../../components/ui/Button';
 
 const FeaturedProducts = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [items, setItems] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Herbal Glow Face Serum",
-      price: 69.99,
-      originalPrice: 89.99,
-      rating: 4.8,
-      reviews: 124,
-      image: "https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=400",
-      badge: "Bestseller",
-      badgeColor: "bg-success",
-      ingredients: ["Aloe Vera", "Vitamin E", "Rose Hip Oil"]
-    },
-    {
-      id: 2,
-      name: "Natural Hair Growth Oil",
-      price: 45.99,
-      originalPrice: null,
-      rating: 4.6,
-      reviews: 89,
-      image: "https://images.pixabay.com/photos/2020/05/11/06/20/hair-5158152_1280.jpg",
-      badge: "New",
-      badgeColor: "bg-accent",
-      ingredients: ["Coconut Oil", "Argan Oil", "Rosemary"]
-    },
-    {
-      id: 3,
-      name: "Organic Body Butter",
-      price: 34.99,
-      originalPrice: 44.99,
-      rating: 4.9,
-      reviews: 156,
-      image: "https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      badge: "Sale",
-      badgeColor: "bg-error",
-      ingredients: ["Shea Butter", "Cocoa Butter", "Lavender"]
-    },
-    {
-      id: 4,
-      name: "Herbal Anti-Aging Cream",
-      price: 79.99,
-      originalPrice: null,
-      rating: 4.7,
-      reviews: 203,
-      image: "https://images.pixabay.com/photos/2019/07/15/12/35/soap-4339235_1280.jpg",
-      badge: "Premium",
-      badgeColor: "bg-warning",
-      ingredients: ["Retinol", "Hyaluronic Acid", "Green Tea"]
-    },
-    {
-      id: 5,
-      name: "Natural Lip Balm Set",
-      price: 24.99,
-      originalPrice: 29.99,
-      rating: 4.5,
-      reviews: 67,
-      image: "https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=400",
-      badge: "Bundle",
-      badgeColor: "bg-secondary",
-      ingredients: ["Beeswax", "Coconut Oil", "Vanilla"]
-    },
-    {
-      id: 6,
-      name: "Herbal Face Cleanser",
-      price: 39.99,
-      originalPrice: null,
-      rating: 4.8,
-      reviews: 145,
-      image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      badge: "Organic",
-      badgeColor: "bg-success",
-      ingredients: ["Neem", "Turmeric", "Honey"]
+  React.useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/v1/products');
+        const data = await res.json();
+        setItems(Array.isArray(data?.items) ? data.items : data);
+      } catch (e) {
+        console.error('Failed to load featured products', e);
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
+    load();
+  }, []);
 
   const itemsPerSlide = 3;
-  const totalSlides = Math.ceil(featuredProducts?.length / itemsPerSlide);
+  const totalSlides = Math.ceil((items?.length || 0) / itemsPerSlide) || 1;
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -125,7 +67,7 @@ const FeaturedProducts = () => {
 
   const getCurrentProducts = () => {
     const startIndex = currentSlide * itemsPerSlide;
-    return featuredProducts?.slice(startIndex, startIndex + itemsPerSlide);
+    return items?.slice(startIndex, startIndex + itemsPerSlide);
   };
 
   return (
@@ -172,15 +114,10 @@ const FeaturedProducts = () => {
                 {/* Product Image */}
                 <div className="relative h-64 overflow-hidden">
                   <Image
-                    src={product?.image}
+                    src={product?.images?.[0]?.image_url || product?.image_url || ''}
                     alt={product?.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-natural-slow"
                   />
-                  
-                  {/* Badge */}
-                  <div className={`absolute top-3 left-3 ${product?.badgeColor} text-white px-2 py-1 rounded-full text-xs font-medium`}>
-                    {product?.badge}
-                  </div>
 
                   {/* Quick Actions */}
                   <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-natural">
